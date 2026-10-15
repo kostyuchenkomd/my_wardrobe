@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Мои образы</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            margin: 0;
+            padding: 10px; 
+            background-color: #E8D8C8; 
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* --- ШАПКА САЙТА --- */
+        .site-header {
+            padding: 40px 0 30px 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .site-header h1 {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            font-size: 42px;
+            font-weight: 300;
+            letter-spacing: 10px;
+            text-transform: uppercase;
+            color: #3a2d20;
+            text-align: center;    /* заголовок по центру */
+        }
+
+        .site-header .signature {
+            margin: 14px 0 0 0;
+            font-family: 'Inter', sans-serif;
+            font-size: 13px;
+            font-weight: 300;
+            letter-spacing: 2px;
+            color: #8a7a6a;
+            text-align: left;      /* подпись по левому краю */
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr); 
+            gap: 12px; 
+            width: 100%; 
+            transition: filter 0.35s ease, transform 0.35s ease;
+        }
+
+        body.modal-open .grid {
+            filter: blur(10px) brightness(0.85);
+            transform: scale(1.02);
+        }
+
+        .item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .item img {
+            width: 100%;
+            aspect-ratio: 1024 / 1340; 
+            object-fit: cover; 
+            display: block;
+            border-radius: 18px; 
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+            cursor: pointer;
+        }
+
+        .item img:hover {
+            transform: translateY(-4px) scale(1.01);
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.22);
+        }
+
+        .item img.stretch {
+            object-fit: contain; 
+            background-color: #000000;
+        }
+
+        .item .caption {
+            margin-top: 10px;
+            font-size: 14px;
+            font-weight: 300;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: #5a4a3a;
+            text-align: center;
+        }
+
+        /* --- МОДАЛЬНОЕ ОКНО --- */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .modal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background-color: #E8D8C8;
+            padding: 28px 36px;
+            border-radius: 22px;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.4);
+            text-align: center;
+            max-width: 92vw;
+            
+            transform: translateY(15px) scale(0.96);
+            transition: transform 0.3s ease;
+        }
+
+        .modal.active .modal-content {
+            transform: translateY(0) scale(1);
+        }
+
+        .modal-content h2 {
+            margin: 0 0 20px 0;
+            font-size: 22px;
+            font-weight: 300;
+            letter-spacing: 1px;
+            color: #3a2d20;
+        }
+
+        .modal-images {
+            display: flex;
+            gap: 14px;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: nowrap;
+        }
+
+        .modal-images img {
+            height: 260px;
+            width: auto;
+            max-width: 200px;
+            object-fit: contain;
+            background-color: #000000;
+            border-radius: 14px;
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+            padding: 6px;
+            box-sizing: border-box;
+        }
+
+        .modal-images.many img {
+            height: 200px;
+            max-width: 160px;
+        }
+
+        @media (max-width: 900px) {
+            .modal-images img { height: 180px; max-width: 140px; }
+            .modal-images.many img { height: 150px; max-width: 120px; }
+        }
+
+        @media (max-width: 768px) {
+            body { padding: 10px; }
+            .grid { grid-template-columns: 1fr; gap: 20px; }
+            .item img { border-radius: 14px; }
+            .item .caption { font-size: 12px; letter-spacing: 1.5px; margin-top: 8px; }
+
+            .site-header { padding: 25px 0 20px 0; }
+            .site-header h1 { font-size: 26px; letter-spacing: 6px; }
+            .site-header .signature { font-size: 11px; letter-spacing: 1.5px; }
+
+            .modal-content { padding: 20px; }
+            .modal-content h2 { font-size: 17px; margin-bottom: 14px; }
+            .modal-images { gap: 8px; flex-wrap: wrap; }
+            .modal-images img,
+            .modal-images.many img { height: 110px; max-width: 85px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ШАПКА САЙТА -->
+    <header class="site-header">
+        <h1>MY WARDROBE</h1>
+        <p class="signature">Сделано с любовью &lt;3</p>
+    </header>
+
+    <div class="grid">
+        <div class="item">
+            <img src="images/look1.jpg" data-look="look1" alt="">
+            <p class="caption">Mocha Minimalist</p>
+        </div>
+
+        <div class="item">
+            <img src="images/look2.jpg" data-look="look2" alt="">
+            <p class="caption">Majority</p>
+        </div>
+
+        <div class="item">
+            <img src="images/look3.jpg" data-look="look3" alt="">
+            <p class="caption">Soft</p>
+        </div>
+
+        <div class="item">
+            <img src="images/look4.jpg" data-look="look4" alt="">
+            <p class="caption">Red Accent</p>
+        </div>
+
+        <div class="item">
+            <img src="images/look5.jpg" data-look="look5" alt="">
+            <p class="caption">Urban Vibe</p>
+        </div>
+
+        <div class="item">
+            <img src="images/look6.jpg" data-look="look6" alt="">
+            <p class="caption">Pastel Comfort</p>
+        </div>
+
+        <div class="item">
+            <img src="images/look7.jpg" data-look="look7" alt="">
+            <p class="caption">Cozy</p>
+        </div>
+
+        <div class="item">
+            <img src="images/look8.jpg" data-look="look8" alt="">
+            <p class="caption">Fresh</p>
+        </div>
+
+        <div class="item">
+            <img src="images/look9.jpg" data-look="look9" alt="">
+            <p class="caption">Chocolate Boy</p>
+        </div>
+
+        <div class="item">
+            <img src="images/look10.jpg" data-look="look10" class="stretch" alt="">
+            <p class="caption">Sunny</p>
+        </div>
+
+        <div class="item">
+            <img src="images/look11.jpg" data-look="look11" alt="">
+            <p class="caption">Midnight</p>
+        </div>
+
+        <div class="item">
+            <img src="images/look12.jpg" data-look="look12" alt="">
+            <p class="caption">Amber Accent</p>
+        </div>
+
+        <div class="item">
+            <img src="images/look13.jpg" data-look="look13" class="stretch" alt="">
+            <p class="caption">Urban Glacier</p>
+        </div>
+
+        <div class="item">
+            <img src="images/look14.jpg" data-look="look14" alt="">
+            <p class="caption">Olive Noir</p>
+        </div>
+
+        <div class="item">
+            <img src="images/look15.jpg" data-look="look15" alt="">
+            <p class="caption">Dark Chrome</p>
+        </div>
+
+        <div class="item">
+            <img src="images/look16.jpg" data-look="look16" class="stretch" alt="">
+            <p class="caption">Total Midnight</p>
+        </div>
+
+        <div class="item">
+            <img src="images/look17.jpg" data-look="look17" class="stretch" alt="">
+            <p class="caption">Red Street</p>
+        </div>
+
+        <div class="item">
+            <img src="images/look18.jpg" data-look="look18" class="stretch" alt="">
+            <p class="caption">Selebrity</p>
+        </div>
+
+        <div class="item">
+            <img src="images/look19.jpg" data-look="look19" alt="">
+            <p class="caption">Midnight Mocha</p>
+        </div>
+
+        <div class="item">
+            <img src="images/look20.jpg" data-look="look20" alt="">
+            <p class="caption">Amber Glow</p>
+        </div>
+
+        <div class="item">
+            <img src="images/look21.jpg" data-look="look21" class="stretch" alt="">
+            <p class="caption">Cozy Indigo</p>
+        </div>
+
+        <div class="item">
+            <img src="images/look22.jpg" data-look="look22" class="stretch" alt="">
+            <p class="caption">Soft Cloud</p>
+        </div>
+
+        <div class="item">
+            <img src="images/look23.jpg" data-look="look23" class="stretch" alt="">
+            <p class="caption">Amber Peper</p>
+        </div>
+
+        <div class="item">
+            <img src="images/look24.jpg" data-look="look24" class="stretch" alt="">
+            <p class="caption">Cocoa Breeze</p>
+        </div>
+
+
+    </div>
+
+    <!-- МОДАЛЬНОЕ ОКНО -->
+    <div class="modal" id="modal">
+        <div class="modal-content">
+            <h2>Составляющие образа:</h2>
+            <div class="modal-images" id="modal-images"></div>
+        </div>
+    </div>
+
+    <script>
+        const looks = {
+            look1:  ['14.png', '9.png', '6.png'],
+            look2:  ['15.png', '16.png', '6.png'],
+            look3:  ['15.png', '19.png', '6.png'],
+            look4:  ['15.png', '16.png', '19.png'],
+            look5:  ['14.png', '13.png', '12.png', '4.png'],
+            look6:  ['20.png', '13.png', '12.png', '4.png'],
+            look7:  ['14.png', '23.png', '4.png'],
+            look8:  ['20.png', '16.png', '8.png', '7.png', '4.png'],
+            look9:  ['14.png', '9.png', '11.png'],
+            look10: ['20.png', '13.png', '12.png', '10.png'],
+            look11: ['17.png', '8.png', '22.png', '10.png'],
+            look12: ['21.png', '8.png', '1.png', '10.png'],
+            look13: ['21.png', '19.png', '22.png', '4.png'],
+            look14: ['21.png', '23.png', '19.png', '3.png'],
+            look15: ['21.png', '19.png', '22.png', '2.png'],
+            look16: ['14.png', '13.png', '12.png', '3.png'],
+            look17: ['21.png', '16.png', '18.png', '24.png'],
+            look18: ['14.png', '16.png', '6.png', '4.png'],
+            look19: ['14.png', '23.png', '1.png', '5.png'],
+            look20: ['14.png', '8.png', '6.png', '10.png'],
+            look21: ['20.png', '16.png', '19.png', '24.png'],
+            look22: ['20.png', '23.png', '12.png', '4.png'],
+            look23: ['20.png', '8.png', '1.png', '24.png'],
+            look24: ['20.png', '9.png', '12.png', '24.png']
+
+        };
+
+        const modal = document.getElementById('modal');
+        const modalContent = modal.querySelector('.modal-content');
+        const modalImagesContainer = document.getElementById('modal-images');
+
+        function showModal(items) {
+            modalImagesContainer.className = 'modal-images' + (items.length >= 5 ? ' many' : '');
+            modalImagesContainer.innerHTML = items
+                .map(name => `<img src="images/${name}" alt="">`)
+                .join('');
+            modal.classList.add('active');
+            document.body.classList.add('modal-open');
+        }
+
+        function hideModal() {
+            modal.classList.remove('active');
+            document.body.classList.remove('modal-open');
+        }
+
+        document.querySelectorAll('.item img[data-look]').forEach(img => {
+            const key = img.dataset.look;
+            const items = looks[key];
+            if (!items) return;
+            img.addEventListener('click', () => showModal(items));
+        });
+
+        modal.addEventListener('click', (e) => {
+            if (!modalContent.contains(e.target)) hideModal();
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') hideModal();
+        });
+    </script>
+
+</body>
+</html>
